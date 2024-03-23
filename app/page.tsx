@@ -1,20 +1,62 @@
+'use client'
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image'
-
-type Pokemon = {
-  index: number;
-  name: string;
-}
-
-const pokemons: Array<Pokemon> = [
-  { index: 1, name: 'フシギダネ', },
-  { index: 2, name: 'フシギソウ', },
-  { index: 3, name: 'フシギバナ', },
-]
 
 const imageUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork';
 const imageShinyUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny';
 
 export default function Home() {
+  const [details, setDetails] = useState<Pokemon[]>([]);
+  const [clickedStates, setClickedStates] = useState<{ [key: number]: boolean }>({});
+  const [shinyClickedStates, setShinyClickedStates] = useState<{ [key: number]: boolean }>({});
+
+  const handleClick = (id: any) => {
+    setClickedStates(prevState => ({ ...prevState, [id]: !prevState[id] }));
+  };
+  const handleShinyClick = (id: any) => {
+    setShinyClickedStates(prevState => ({ ...prevState, [id]: !prevState[id] }));
+  };
+
+  useEffect(() => {
+    const fetchPokemon = async () => {
+      const pokemonList = await getPokemonList();
+      const details = await getPokemonDetails(pokemonList);
+      setDetails(details);
+    };
+    fetchPokemon();
+  }, []);
+
+  type Pokemon = {
+    id: number;
+    name: string;
+    jaName: string;
+  };
+
+  async function getPokemonList() {
+    const response = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=1025');
+    const data = await response.json();
+    return data.results;
+  }
+
+  async function getPokemonDetails(pokemonList: any): Promise<Pokemon[]> {
+    const pokemonDetails: Pokemon[] = [];
+
+    for (const pokemon of pokemonList) {
+      const response = await fetch(pokemon.url);
+      const data = await response.json();
+
+      const jaNameEntry = data.names.find((nameEntry: any) => nameEntry.language.name === "ja-Hrkt");
+      const pokemonDetail: Pokemon = {
+        id: data.id,
+        name: data.name,
+        jaName: jaNameEntry.name,
+      };
+      pokemonDetails.push(pokemonDetail);
+    }
+
+    return pokemonDetails;
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
 
@@ -27,56 +69,31 @@ export default function Home() {
                   <tr>
                     <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">Index</th>
                     <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">Pokémon</th>
-                    <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">All</th>
-                    <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">3 Star</th>
-                    <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">Lucky</th>
-                    <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">Shadow</th>
-                    <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">Light</th>
+                    <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">Normal</th>
                     <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500">Shiny</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {pokemons.map((pokemon) => {
+                  {details.map((pokemon: Pokemon) => {
                     return <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{pokemon.index}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">{pokemon.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">{pokemon.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">{pokemon.jaName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"><Image
-                        src={`${imageUrl}/${pokemon.index}.png`}
+                        src={`${imageUrl}/${pokemon.id}.png`}
                         width={30}
                         height={30}
                         alt={pokemon.name}
+                        onClick={() => handleClick(pokemon.id)}
+                        style={{ filter: clickedStates[pokemon.id] ? 'opacity(20%)' : 'none' }}
                       /></td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"><Image
-                        src={`${imageUrl}/${pokemon.index}.png`}
+                        src={`${imageShinyUrl}/${pokemon.id}.png`}
                         width={30}
                         height={30}
                         alt={pokemon.name}
+                        onClick={() => handleShinyClick(pokemon.id)}
+                        style={{ filter: shinyClickedStates[pokemon.id] ? 'opacity(20%)' : 'none' }}
                       /></td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"><Image
-                        src={`${imageUrl}/${pokemon.index}.png`}
-                        width={30}
-                        height={30}
-                        alt={pokemon.name}
-                      /></td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"><Image
-                        src={`${imageUrl}/${pokemon.index}.png`}
-                        width={30}
-                        height={30}
-                        alt={pokemon.name}
-                      /></td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"><Image
-                        src={`${imageUrl}/${pokemon.index}.png`}
-                        width={30}
-                        height={30}
-                        alt={pokemon.name}
-                      /></td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"><Image
-                        src={`${imageShinyUrl}/${pokemon.index}.png`}
-                        width={30}
-                        height={30}
-                        alt={pokemon.name}
-                      /></td>
-
                     </tr>
                   })}
                 </tbody>
@@ -88,3 +105,4 @@ export default function Home() {
     </main>
   );
 }
+
