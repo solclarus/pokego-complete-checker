@@ -18,43 +18,34 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const fetchPokemon = async () => {
+    async function fetchPokemon() {
       const pokemonList = await getPokemonList();
       const details = await getPokemonDetails(pokemonList);
       setDetails(details);
-    };
+    }
+    async function getPokemonDetails(pokemonList: any) {
+      const pokemonDetails = [];
+      for (const pokemon of pokemonList) {
+        const response = await fetch(pokemon.url);
+        const data = await response.json();
+        const jaNameEntry = data.names.find((nameEntry: { language: { name: string; }; }) => nameEntry.language.name === "ja-Hrkt");
+        const pokemonDetail = {
+          id: data.id,
+          name: data.name,
+          jaName: jaNameEntry.name,
+        };
+        pokemonDetails.push(pokemonDetail);
+      }
+      return pokemonDetails;
+    }
+
     fetchPokemon();
   }, []);
-
-  type Pokemon = {
-    id: number;
-    name: string;
-    jaName: string;
-  };
 
   async function getPokemonList() {
     const response = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=1025');
     const data = await response.json();
     return data.results;
-  }
-
-  async function getPokemonDetails(pokemonList: any): Promise<Pokemon[]> {
-    const pokemonDetails: Pokemon[] = [];
-
-    for (const pokemon of pokemonList) {
-      const response = await fetch(pokemon.url);
-      const data = await response.json();
-
-      const jaNameEntry = data.names.find((nameEntry: any) => nameEntry.language.name === "ja-Hrkt");
-      const pokemonDetail: Pokemon = {
-        id: data.id,
-        name: data.name,
-        jaName: jaNameEntry.name,
-      };
-      pokemonDetails.push(pokemonDetail);
-    }
-
-    return pokemonDetails;
   }
 
   return (
@@ -75,7 +66,7 @@ export default function Home() {
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {details.map((pokemon: Pokemon) => {
-                    return <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                    return <tr key={pokemon.id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">{pokemon.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">{pokemon.jaName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"><Image
@@ -106,3 +97,8 @@ export default function Home() {
   );
 }
 
+type Pokemon = {
+  id: number;
+  name: string;
+  jaName: string;
+};
