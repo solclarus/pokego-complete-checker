@@ -1,6 +1,7 @@
-import { Pokemon, columns } from "./columns"
+import { columns } from "./columns"
 import { DataTable } from "./data-table"
 import { createClient } from '@/utils/supabase/server'
+import { ThemeSwitch } from "./ThemeSwitch"
 
 async function getData(): Promise<any> {
   const supabase = createClient()
@@ -13,7 +14,7 @@ async function getData(): Promise<any> {
   return pokemons
 }
 
-export default async function DemoPage() {
+export default async function HomePage() {
   const data = await getData()
 
   return (
@@ -22,6 +23,7 @@ export default async function DemoPage() {
         <div className="-m-1.5 overflow-x-auto">
           <div className="p-1.5 min-w-full inline-block align-middle">
             <div className="overflow-hidden">
+              <ThemeSwitch />
               <DataTable columns={columns} data={data} />
             </div>
           </div>
