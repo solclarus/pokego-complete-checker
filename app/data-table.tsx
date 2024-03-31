@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { DataTableFacetedFilter } from "./data-table-faceted-filter"
+import { DataTablePagenation } from "./DataTablePagination"
 import { Input } from "@/components/ui/input"
 import {
     ColumnDef,
@@ -28,6 +29,20 @@ interface DataTableProps<TData, TValue> {
     data: TData[]
 }
 
+const regions = [
+    { label: "カントー", value: "kanto" },
+    { label: "ジョウト", value: "johto" },
+    { label: "ホウエン", value: "hoenn" },
+    { label: "シンオウ", value: "sinnoh" },
+    { label: "イッシュ", value: "unova" },
+    { label: "カロス", value: "kalos" },
+    { label: "アローラ", value: "alola" },
+    { label: "ガラル", value: "galar" },
+    { label: "ヒスイ", value: "hisui" },
+    { label: "パルデア", value: "paldea" },
+    { label: "未確認", value: "unknown" },
+]
+
 export function DataTable<TData, TValue>({
     columns,
     data,
@@ -53,15 +68,24 @@ export function DataTable<TData, TValue>({
 
     return (
         <div>
-            <div className="flex items-center py-4">
+            <div className="flex items-center pt-16">
                 <Input
                     placeholder="Find Pokémon"
                     value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
                         table.getColumn("name")?.setFilterValue(event.target.value)
                     }
-                    className="max-w-sm"
                 />
+            </div>
+            <div className="flex justify-between items-center py-4">
+                <div className="flex items-center space-x-2">
+                    <DataTableFacetedFilter
+                        column={table.getColumn("region")}
+                        title="Region"
+                        options={regions}
+                    />
+                </div>
+                <DataTablePagenation table={table} />
             </div>
             <div className="rounded-md border">
                 <Table>
@@ -107,24 +131,7 @@ export function DataTable<TData, TValue>({
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                >
-                    Previous
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                >
-                    Next
-                </Button>
-            </div>
+
         </div>
     )
 }

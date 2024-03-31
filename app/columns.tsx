@@ -1,18 +1,24 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from 'next/image'
+import { CaretSortIcon } from "@radix-ui/react-icons"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
+export type Region = {
+    region: "kanto" | "johto" | "hoenn" | "sinnoh" | "unova" | "kalos" | "alola" | "galar" | "hisui" | "paldea" | "unknown"
+}
+
 export type Pokemon = {
     id: number
     name: string
-    region: "kanto" | "johto" | "hoenn" | "sinnoh" | "unova" | "kalos" | "alola" | "galar" | "hisui" | "paldea" | "unknown"
-    all: boolean
+    region: Region
+    normal: boolean
     shiny: boolean
+    shadow: boolean
+    light: boolean
 }
 const imageUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork';
 const imageShinyUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny';
@@ -27,7 +33,7 @@ export const columns: ColumnDef<Pokemon>[] = [
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
                     ID
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <CaretSortIcon className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
@@ -41,23 +47,28 @@ export const columns: ColumnDef<Pokemon>[] = [
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
                     Name
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <CaretSortIcon className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
     },
     {
-        accessorKey: "all",
+        accessorKey: "normal",
         header: "Normal",
         cell: ({ row }) => {
-            return row.original.all ? (
-                <Image
-                    src={`${imageUrl}/${row.original.id}.png`}
-                    width={30}
-                    height={30}
-                    alt={row.original.name}
-                />
-            ) : null;
+            return row.original.normal ? (
+                <div className="flex justify-center items-center">
+                    <Image className="place-self-center"
+                        src={`${imageUrl}/${row.original.id}.png`}
+                        width={30}
+                        height={30}
+                        alt={row.original.name}
+                    />
+                </div>
+
+            ) : (<div className="flex justify-center items-center">
+                <span>-</span>
+            </div>);
         },
     },
     {
@@ -65,17 +76,63 @@ export const columns: ColumnDef<Pokemon>[] = [
         header: "Shiny",
         cell: ({ row }) => {
             return row.original.shiny ? (
-                <Image
-                    src={`${imageShinyUrl}/${row.original.id}.png`}
-                    width={30}
-                    height={30}
-                    alt={row.original.name}
-                />
-            ) : null;
+                <div className="flex justify-center items-center">
+                    <Image className="place-self-center"
+                        src={`${imageShinyUrl}/${row.original.id}.png`}
+                        width={30}
+                        height={30}
+                        alt={row.original.name}
+                    />
+                </div>
+
+            ) : (<div className="flex justify-center items-center">
+                <span>-</span>
+            </div>);
+        },
+    },
+    {
+        accessorKey: "shadow",
+        header: "Shadow",
+        cell: ({ row }) => {
+            return row.original.shadow ? (
+                <div className="flex justify-center items-center">
+                    <Image className="place-self-center"
+                        src={`${imageUrl}/${row.original.id}.png`}
+                        width={30}
+                        height={30}
+                        alt={row.original.name}
+                    />
+                </div>
+
+            ) : (<div className="flex justify-center items-center">
+                <span>-</span>
+            </div>);
+        },
+    },
+    {
+        accessorKey: "light",
+        header: "Light",
+        cell: ({ row }) => {
+            return row.original.light ? (
+                <div className="flex justify-center items-center">
+                    <Image className="place-self-center"
+                        src={`${imageUrl}/${row.original.id}.png`}
+                        width={30}
+                        height={30}
+                        alt={row.original.name}
+                    />
+                </div>
+
+            ) : (<div className="flex justify-center items-center">
+                <span>-</span>
+            </div>);
         },
     },
     {
         accessorKey: "region",
         header: "Region",
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id));
+        },
     },
 ]
